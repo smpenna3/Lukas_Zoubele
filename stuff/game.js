@@ -19,46 +19,9 @@ var config = {
 
 var game = new Phaser.Game(config);
 
-var socket = io();
-
-otherPlayers = game.scene.scenes[0].physics.add.group();
-
-socket.on('currentPlayers', function(players){
-    Object.keys(players).forEach(function (id) {
-        if (players[id].playerId === self.socket.id) {
-          addPlayer(self, players[id]);
-        } else {
-          addOtherPlayers(self, players[id]);
-        }
-    });
-});
-
-socket.on('newPlayer', function(player){
-    addOtherPlayers(self, player);
-    console.log('adding new player');
-});
-
-socket.on('disconnect', function(player){
-    otherPlayers.getChildren().forEach(function (otherPlayer) {
-        if (playerId === otherPlayer.playerId) {
-          otherPlayer.destroy();
-        }
-    });
-});
-
-
-// game.scene.scenes[0].physics
-function addOtherPlayers(){
-    enemy = game.scene.scenes[0].physics.add.image(200, 200, 'car');
-    enemy.setScale(0.05);
-    enemy.setCollideWorldBounds(true);
-
-    otherPlayers.add(enemy);
-}
-
 function preload(){
-    this.load.image('car', 'car.png');
-    this.load.image('otherCar', 'car.png');
+    this.load.image('car', 'grnline.png');
+    this.load.image('otherCar', 'grnline.png');
 }
 
 function create(){
@@ -96,14 +59,15 @@ function create(){
 }
 
 function addPlayer(self, playerInfo) {
-    self.car = self.physics.add.image(playerInfo.x, playerInfo.y, 'car').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-    self.car.setScale(0.05);
+    self.car = self.physics.add.image(playerInfo.x, playerInfo.y, 'car');
     self.car.setCollideWorldBounds(true);
+    self.car.setDrag(100);
+    self.car.setAngularDrag(100);
+    self.car.setMaxVelocity(200);
 }
 
 function addOtherPlayers(self, playerInfo) {
-    const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'otherCar').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-    otherPlayer.setScale(0.05);
+    const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'otherCar');
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
 }
@@ -119,7 +83,7 @@ function update(){
         }
 
         if (this.cursors.up.isDown) {
-            this.physics.velocityFromRotation(this.car.rotation + 1.5, 100, this.car.body.acceleration);
+            this.physics.velocityFromRotation(this.car.rotation, 100, this.car.body.acceleration);
         } else {
             this.car.setAcceleration(0);
         }
