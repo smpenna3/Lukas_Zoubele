@@ -2,8 +2,8 @@ var velocity = 300;
 
 var config = {
     type: Phaser.AUTO,
-    width: 10000,
-    height: 6000,
+    width: 1200,
+    height: 750,
     physics: {
         default: 'arcade',
         arcade: {
