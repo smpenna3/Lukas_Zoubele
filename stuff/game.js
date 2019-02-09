@@ -19,16 +19,53 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var socket = io();
+
+otherPlayers = game.scene.scenes[0].physics.add.group();
+
+socket.on('currentPlayers', function(players){
+    Object.keys(players).forEach(function (id) {
+        if (players[id].playerId === self.socket.id) {
+          addPlayer(self, players[id]);
+        } else {
+          addOtherPlayers(self, players[id]);
+        }
+    });
+});
+
+socket.on('newPlayer', function(player){
+    addOtherPlayers(self, player);
+    console.log('adding new player');
+});
+
+socket.on('disconnect', function(player){
+    otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerId === otherPlayer.playerId) {
+          otherPlayer.destroy();
+        }
+    });
+});
+
+
+// game.scene.scenes[0].physics
+function addOtherPlayers(){
+    enemy = game.scene.scenes[0].physics.add.image(200, 200, 'car');
+    enemy.setScale(0.05);
+    enemy.setCollideWorldBounds(true);
+
+    otherPlayers.add(enemy);
+}
+
 function preload(){
     this.load.image('car', 'car.png');
 }
 
 function create(){
+    cursors = this.input.keyboard.createCursorKeys();
+
     player = this.physics.add.image(450, 450, 'car');
     player.setScale(0.05);
     player.setCollideWorldBounds(true);
-    //this.cameras.main.startFollow(player, true);
-    cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update(){
@@ -77,4 +114,14 @@ function update(){
         player.setVelocityX(0);
         player.setVelocityY(0);
     }
+
+    socket.emit('moved', {x:player.x, y:player.y});
 }
+
+socket.on('playerMoved', function(playerInfo){
+    otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+        }
+    });
+})
