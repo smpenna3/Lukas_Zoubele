@@ -2,8 +2,8 @@ var velocity = 300;
 
 var config = {
     type: Phaser.AUTO,
-    width: 900,
-    height: 600,
+    width: 10000,
+    height: 6000,
     physics: {
         default: 'arcade',
         arcade: {
@@ -26,6 +26,7 @@ function preload(){
 
 function create(){
     var self = this;
+    this.add.image(1200, 750, 'Boston.png');
     this.socket = io();
     this.otherPlayers = this.physics.add.group();
     this.socket.on('currentPlayers', function(players) {
